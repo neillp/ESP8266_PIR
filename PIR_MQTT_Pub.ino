@@ -5,9 +5,9 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
-const char* ssid = "pieterse";
-const char* password = "yours246";
-const char* server = "192.168.1.5";
+const char* ssid = "ssid";
+const char* password = "router password";
+const char* server = "192.168.x.x";
 const char* pirtopic = "/pir/trigger";
 const int CSpin = 10;
 
