@@ -1,0 +1,67 @@
+# This is a MQTT Subscribe script for Rasberry Pi to trigger a Relay.
+
+mymessage = "NO"
+
+def on_message(client, userdata, message):
+	
+	print ("message received " ,str(message.payload.decode("utf-8")))
+	print("Test = " ,message.payload)
+        print("message topic=",message.topic)
+	print("message qos=",message.qos)
+	print("message retain flag=",message.retain)
+        global mymessage
+        mymessage = message.payload
+        print("mymessage = ", mymessage)
+
+import paho.mqtt.client as mqtt     #import the client1
+import time
+
+def on_connect(client, userdata, flags, rc):
+    if rc == 0:
+         print("Connected to broker")
+         global Connected           #Use global variable
+         Connected = True           #Signal connection 
+    else:
+         print("Connection failed")
+
+broker_address="192.168.1.5"
+port = 1883                         #Broker port
+user = "pi"                         #Connection username
+password = "yours246"               #Connection password
+print("creating new instance")
+client = mqtt.Client("pi")          #create new instance
+client.on_message=on_message        #attach function to call
+print("connecting to broker")
+client.connect(broker_address)      #connect to broker
+client.loop_start()                 #start the loop
+print("Subscribing to topic","house/bulbs")
+client.subscribe("house/bulbs")
+
+time.sleep(4)               # wait
+
+# RELAY SECTION
+
+import RPi.GPIO as GPIO
+from time import sleep
+
+while (True):
+
+   GPIO.setmode(GPIO.BCM)    # The script as below using BCM GPIO 00..nn numbers
+   GPIO.setwarnings(False)   # Clear warnings
+   GPIO.setup(12, GPIO.OUT)  # Set relay pins as output
+
+   if mymessage == 'ON':
+     
+    GPIO.output(12, GPIO.HIGH)  # Turn relay ON
+    print("mymessage HIGH = ", mymessage)
+    sleep(30)                  # Sleep for 5 seconds
+    GPIO.cleanup() 
+       
+   else:
+    # Turn relay OFF
+    GPIO.output(12, GPIO.LOW)
+    print("mymessage LOW = ", mymessage) 
+    sleep(10)                  # Sleep for 5 seconds
+    GPIO.cleanup()
+   
+# client.loop_stop()          #stop the loop
